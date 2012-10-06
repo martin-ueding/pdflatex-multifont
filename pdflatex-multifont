@@ -1,0 +1,78 @@
+#!/bin/bash
+# Copyright © 2012 Martin Ueding <dev@martin-ueding.de>
+
+###############################################################################
+#                                License (MIT)                                #
+###############################################################################
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# Compile a given LaTeX document with different fonts.
+
+set -u
+
+title="${1%.tex}"
+
+# List the whole thing that goes after ``\includepackage`` here. (Space around
+# it make it easy to sort in Vim.)
+fonts=(
+
+'[charter]{mathdesign}'
+'[garamond]{mathdesign}'
+'[math]{anttor}'
+'[math]{iwona}'
+'[math]{kurier}'
+'[urw-garamond]{mathdesign}'
+'[utopia]{mathdesign}'
+'[varg]{txfonts}'
+'{antpolt}'
+'{arev}'
+'{boisik}'
+'{cmbright}'
+'{fouriernc}'
+'{fourier}'
+'{kmath,kerkis}'
+'{kpfonts}'
+'{lmodern}'
+'{mathpazo}'
+'{mathpple}'
+'{mathptmx}'
+'{mathtime}'
+'{mbtimes}'
+'{millennial}'
+
+)
+
+for font in "${fonts[@]}"
+do
+	{
+		# Compile the document three times to get all the references right. One
+		# could just use the ``.aux`` file from the main project to get this
+		# right instead. Might be even faster.
+		for i in {1..3}
+		do
+			pdflatex -interaction batchmode -jobname "$title-$font" \
+				"\\RequirePackage$font \\input{$title}"
+		done
+
+		# Clean up all the other files that ``pdflatex`` generated.
+		latexmk -c "$title-$font.log"
+	} &
+done
+
+wait
