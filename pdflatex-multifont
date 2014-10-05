@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright © 2012-2013 Martin Ueding <dev@martin-ueding.de>
+# Copyright © 2012-2014 Martin Ueding <dev@martin-ueding.de>
 
 # Compile a given LaTeX document with different fonts.
 
@@ -39,19 +39,19 @@ fonts=(
 
 for font in "${fonts[@]}"
 do
-	{
-		# Compile the document three times to get all the references right. One
-		# could just use the ``.aux`` file from the main project to get this
-		# right instead. Might be even faster.
-		for i in {1..3}
-		do
-			pdflatex -interaction batchmode -jobname "$title-$font" \
-				"\\RequirePackage$font \\input{$title}"
-		done
+    {
+        # Compile the document three times to get all the references right. One
+        # could just use the ``.aux`` file from the main project to get this
+        # right instead. Might be even faster.
+        for i in {1..3}
+        do
+            pdflatex -interaction batchmode -jobname "$title-$font" \
+                "\\RequirePackage$font \\input{$title}"
+        done
 
-		# Clean up all the other files that ``pdflatex`` generated.
-		latexmk -c "$title-$font.log"
-	} &
+        # Clean up all the other files that ``pdflatex`` generated.
+        latexmk -c "$title-$font.log"
+    } &
 done
 
 wait
